@@ -1,10 +1,10 @@
 var margin = {
         top: 30,
-        right: 330,
+        right: 30,
         bottom: 30,
         left: 80
     },
-    width = 800 - margin.left - margin.right,
+    width = 850 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
 // Add data set
@@ -154,9 +154,10 @@ plot.select('.axis.y')
 
 // draw value text labels
 labels
-    .attr('x', d => x(d.population_2012) - 5)
+    .attr('x', 5)
     .attr('y', d => y(d.country) + y.bandwidth() / 2)
     .attr('dy', '0.35em')
+    .style("text-anchor", "start")
     .text(d => d.population_2012);
 
 
@@ -188,7 +189,7 @@ function drawLineGraph(fd) {
         .attr("width", w + 80)
         .attr("height", h + 80)        
 
-    xScale_line.domain(d3.extent(pct_data, d => d.year.toString()));
+    xScale_line.domain(d3.extent(pct_data, d => d.year));
     yScale_line.domain([0, d3.max(pct_data, d => d.pct) + 0.1]);
 
     // Add the valueline path.
