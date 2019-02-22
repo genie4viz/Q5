@@ -169,7 +169,7 @@ function drawLineGraph(fd) {
     var item = {};
     for (var i = 0; i < year_diffs.length; i++) {
         item = {};
-        item.year = years[i];
+        item.year = +years[i];
         item.pct = +(100 * year_diffs[i] / total).toFixed(2);
         pct_data.push(item);
     }
@@ -202,7 +202,7 @@ function drawLineGraph(fd) {
     // Add the X Axis
     svgLine.append("g")
         .attr("transform", "translate(40," + h + ")")
-        .call(d3.axisBottom(xScale_line).ticks(5));
+        .call(d3.axisBottom(xScale_line).ticks(5).tickFormat(d3.format("d")));
 
     // Add the Y Axis
     svgLine.append("g")  
