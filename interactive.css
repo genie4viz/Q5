@@ -1,39 +1,23 @@
-div.main {
-    margin: auto;
-    width: 1000px;
+body {
+    font-family: "avenir next", Arial, sans-serif;
+    font-size: 12px;
+    margin: 0;
 }
 
-.main h1 {
-    text-align: center;
+rect.bar {
+    fill: gray;
 }
 
-.bar rect {
-    fill: deepskyblue;
+text.label {
+    text-anchor: end;
+    fill: #fff;
 }
-
-.bar text {
-    fill: white;
-    font-size: 18px;
-    text-anchor: start;
+text.legend {
+    text-anchor: end;
+    fill: #000;
 }
-
-.axis path {
-    display: none;
-}
-
-.axis line {
+.line {
     fill: none;
-    stroke: #000;
-    shape-rendering: crispEdges;
-}
-
-.axis text {
-    font-size: 18px;
-}
-
-.axis2 path,
-.axis2 line {
-    fill: none;
-    stroke: black;
-    shape-rendering: crispEdges;
+    stroke: steelblue;
+    stroke-width: 2px;
 }

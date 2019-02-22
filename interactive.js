@@ -1,10 +1,10 @@
 var margin = {
-        top: 20,
-        right: 230,
+        top: 30,
+        right: 330,
         bottom: 30,
-        left: 200
+        left: 80
     },
-    width = 1000 - margin.left - margin.right,
+    width = 800 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
 // Add data set
@@ -63,116 +63,170 @@ var dataset = [{
             year_2017: -17029
         }
     }
-]
-//var format = dataset.map(function(cur){
-//var total = cur.value.year_2013+cur.value.year_2014
-//+cur.value.year_2015+cur.value.year_2016
-//+cur.value.year_2017;
-//var value = [cur.value.year_2013, cur.value.year_2014,
-//cur.value.year_2015,cur.value.year_2016,cur.value.year_2017];
-//return{
-//name:cur.club,
-//value:d3.zip(["2013","2014","2015","2016","2017"], value),
-//total:total
-//}
-//});
+];
 
-var svg = d3.select(".main").append("svg:svg")
-    .attr("height", height + margin.top + margin.bottom)
-    .attr("width", width + margin.left + margin.right)
-    .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+var x = d3.scaleLinear()
+    .domain([0, d3.max(dataset, d => d.population_2012)])
+    .range([0, width]);
 
-var x = d3.scale.sqrt()
-    .range([0, width])
-    .domain([0, d3.max(format, function (d) {
-        return d.total;
-    })])
-    .nice();
-var y = d3.scale.ordinal()
-    .rangeRoundBands([0, height], 0.1)
-    .domain(format.map(function (d) {
-        return d.name;
-    }));
-var yAxis = d3.svg.axis()
+var y = d3.scaleBand()
+    .domain(dataset.map(d => d.country))
+    .range([0, height]).padding(0.15);
+
+var xAxis = d3.axisBottom()
+    .scale(x)
+    .ticks(0);
+var yAxis = d3.axisLeft()
     .scale(y)
-    .orient("left")
-    .tickPadding(6);
-var bar = svg.selectAll(".bar")
-    .data(format)
-    .enter().append("g")
-    .attr("class", "bar")
-    .attr("transform", function (d) {
-        return "translate(0," + y(d.name) + ")";
-    });
-bar.append("rect")
-    .attr("width", function (d) {
-        return x(d.total);
+    .tickSize(0)
+    .tickPadding(8);
+
+var xScale = d3.scaleLinear()
+    .domain([0, d3.max(dataset, d => d.population_2012)])
+    .range([0, width]);
+
+var yScale = d3.scaleBand()
+    .domain(dataset.map(d => d.country))
+    .range([0, height]);
+
+var svg = d3.select('#chart')
+    .append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+
+var plot = svg.append('g')
+    .attr('class', 'plot')
+    .attr('transform', `translate(${margin.left}, ${margin.top})`);
+plot
+    .append('g')
+    .attr('class', 'bars')
+    .selectAll('.bar')
+    .data(dataset)
+    .enter()
+    .append('rect')
+    .attr('class', 'bar');
+
+plot
+    .append('g')
+    .attr('class', 'labels')
+    .selectAll('.label')
+    .data(dataset)
+    .enter()
+    .append('text')
+    .attr('class', 'label');
+
+plot
+    .append('g')
+    .attr('class', 'axis x')
+
+plot
+    .append('g')
+    .attr('class', 'axis y')
+
+var bars = plot.selectAll('.bar');
+var labels = plot.selectAll('.label');
+
+var svgLine = d3.select('#chart')
+    .append('svg');    
+
+bars
+    .attr('x', x(0))
+    .attr('y', d => y(d.country))
+    .attr('width', d => x(d.population_2012) - x(0))
+    .attr('height', y.bandwidth())
+    .on("mouseover", function (d) {
+        d3.select(this).style("fill", "deepskyblue");
+        drawLineGraph(d);
     })
-    .attr("height", y.rangeBand())
-    .on("mouseover", showLegend)
-    .on("mouseout", offLegend);
-bar.append("text")
-    .attr("x", 10)
-    .attr("y", y.rangeBand() * 0.5)
-    .attr("dy", ".35em")
-    .text(function (d) {
-        return "$" + d.total;
-    });
-svg.append("g")
-    .attr("class", "y axis")
-    .call(yAxis);
-var legend = svg.append("g")
-    .attr("transform", "translate(" + (width + 30) + ", " + (height - 350) + ")")
-    .attr("class", ".legend");
+    .on("mouseout", function (d) {
+        d3.select(this).style("fill", "grey");
+        svgLine.selectAll("*").remove();
+    })
 
-function showLegend(data) {
-    d3.selectAll(".lchart").remove();
-    d3.select(this).style("fill", "teal");
-    var lchart = svg.append("svg")
-        .attr("class", "lchart")
-        .attr("height", height + margin.top + margin.bottom)
-        .attr("width", width + margin.left + margin.right)
-        .append("g")
-        .attr("transform", "translate(500,150)");
-    var x2 = d3.scale.linear().domain([2013, 2017]).range([0, 150]);
-    var y2 = d3.scale.linear().domain([d3.min(data.value, function (d) {
-            return d[1];
-        }), d3.max(data.value, function (d) {
-            return d[1];
-        })])
-        .range([120, 0]);
-    var xAxis2 = d3.svg.axis()
-        .scale(x2)
-        .orient("bottom")
-        .ticks(5)
-        .tickFormat(d3.format("d"));
-    var yAxis2 = d3.svg.axis()
-        .scale(y2)
-        .orient("left")
-        .ticks(5);
-    lchart.append("g")
-        .attr("class", "axis2")
-        .attr("transform", "translate(0, 120)")
-        .call(xAxis2);
-    lchart.append("g")
-        .attr("class", "axis2")
-        .call(yAxis2);
-    var line = d3.svg.line()
-        .x(function (d) {
-            return x2(d[0]);
-        })
-        .y(function (d) {
-            return y2(d[1]);
-        });
-    lchart.append("path")
-        .attr("d", line(data.value))
-        .style("stroke", "teal")
-        .style("stroke-width", 2)
-        .style("fill", "none");
-};
+plot.select('.axis.x')
+    .attr('transform', `translate(0, ${height})`)
+    .call(xAxis)
+    .select('.domain').remove();
 
-function offLegend() {
-    d3.selectAll(".lchart").remove();
-    d3.select(this).style("fill", "deepskyblue");
+plot.select('.axis.y')
+    .call(yAxis)
+    .select('.domain').remove();
+
+// draw value text labels
+labels
+    .attr('x', d => x(d.population_2012) - 5)
+    .attr('y', d => y(d.country) + y.bandwidth() / 2)
+    .attr('dy', '0.35em')
+    .text(d => d.population_2012);
+
+
+function drawLineGraph(fd) {
+    var total = fd.population_2012;
+    var pct_data = [];
+    var year_diffs = d3.values(fd.growth);
+    var years = ["2013", "2014", "2015", "2016", "2017"];
+    var item = {};
+    for (var i = 0; i < year_diffs.length; i++) {
+        item = {};
+        item.year = years[i];
+        item.pct = +(100 * year_diffs[i] / total).toFixed(2);
+        pct_data.push(item);
+    }
+    
+    svgLine.selectAll("*").remove();
+    var w = 400;
+    var h = 300;
+
+    var xScale_line = d3.scaleLinear().range([0, w]);
+    var yScale_line = d3.scaleLinear().range([h, 0]);
+
+    var valueline = d3.line()
+        .x(d => 40 + xScale_line(d.year))
+        .y(d =>  yScale_line(d.pct));
+
+    svgLine
+        .attr("width", w + 80)
+        .attr("height", h + 80)        
+
+    xScale_line.domain(d3.extent(pct_data, d => d.year.toString()));
+    yScale_line.domain([0, d3.max(pct_data, d => d.pct) + 0.1]);
+
+    // Add the valueline path.
+    svgLine        
+        .append("path")
+        .data([pct_data])
+        .attr("class", "line")        
+        .attr("d", valueline);
+
+    // Add the X Axis
+    svgLine.append("g")
+        .attr("transform", "translate(40," + h + ")")
+        .call(d3.axisBottom(xScale_line).ticks(5));
+
+    // Add the Y Axis
+    svgLine.append("g")  
+        .attr("transform", "translate(40," + 0 + ")")      
+        .call(d3.axisLeft(yScale_line));
+
+    // X axis legend
+    svgLine.append("g")
+        .append("text")
+        .attr("class", "legend")
+        .attr("x", w)
+        .attr("y", h + 30)
+        .attr("font-size", 12)        
+        .style("text-anchor", "middle")
+        .text("Year");
+
+    // Y axis label
+    svgLine.append("g")
+        .append("text")
+        .attr("class", "legend")
+        .attr("x", -80)
+        .attr("y", 10)
+        .attr("transform", "rotate(-90)")
+        .attr("font-size", 12)        
+        .style("text-anchor", "end")
+        .text("Pc t %");
+
 }
